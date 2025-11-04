@@ -38,7 +38,7 @@ const emit = defineEmits<{
     </div>
 
     <TransitionGroup name="skill" tag="div" class="space-y-2">
-      <div v-for="(it,i) in items" :key="i + ':' + it.name" class="flex gap-2">
+      <div v-for="(it,i) in items" :key="i" class="flex gap-2">
         <input class="input flex-1" placeholder="名前" :value="it.name"
                @input="$emit('update:name', i, ($event.target as HTMLInputElement).value)" />
         <input class="input w-24" type="number" min="1" :value="it.research"

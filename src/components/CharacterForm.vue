@@ -281,7 +281,7 @@ watch(state,(v)=>{ try{
           </div>
 
           <TransitionGroup name="skill" tag="div" class="space-y-2 mt-2">
-            <div v-for="(it, i) in artsUserItems" :key="'arts-'+i+':'+it.name" class="flex gap-2">
+            <div v-for="(it, i) in artsUserItems" :key="'arts-'+i" class="flex gap-2">
               <input class="input flex-1" placeholder="名前" :value="it.name"
                      @input="updateArtsName(i, ($event.target as HTMLInputElement).value)" />
               <input class="input w-24" type="number" min="1" :value="it.research"
