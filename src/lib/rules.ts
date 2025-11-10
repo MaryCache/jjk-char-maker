@@ -6,7 +6,7 @@ export const halfRoundUp = (v: number) => Math.max(1, Math.ceil(v / 2));
 /** 呪力量（実値）= 割り振り値 * 5 */
 export const poolFromAlloc = (alloc: number) => Math.max(1, alloc) * 5;
 
-/** 探査プレビュー算出 */
+/** 探査プレビュー算出（実値のまま保持） */
 export function explorationScores(h: HumanStats) {
   const zanEiOrVisual = (h.int + h.sense) * 5;
   const chase = h.agi * 10;
@@ -167,6 +167,9 @@ export function buildText1(c: CharacterSheet) {
   return lines.join("\n").trim();
 }
 
+/* 百分率→レベル(1–10相当)に丸める。0 を許容したいなら Math.max(0, …) に変更してね。*/
+const toLv = (v: number) => Math.max(1, Math.round(v / 10));
+
 /** テキスト２：状態管理 */
 export function buildText2(c: CharacterSheet) {
   const e = explorationScores(c.human);
@@ -183,11 +186,11 @@ export function buildText2(c: CharacterSheet) {
   lines.push(`呪力効率：${c.jujutsu.efficiency}%`);
   lines.push(`最大呪力出力：${c.jujutsu.maxOutput}`);
   lines.push("꧁——探査——꧂");
-  lines.push(`【残穢/目視】：${e.zanEi}`);
-  lines.push(`【追跡】：${e.chase}`);
-  lines.push(`【考察】：${e.consider}`);
-  lines.push(`【直感】：${e.intuition}`);
-  lines.push(`【隠匿】：${e.conceal}`);
+  lines.push(`【残穢/目視】Lv.${toLv(e.zanEi)}`);
+  lines.push(`【追跡】Lv.${toLv(e.chase)}`);
+  lines.push(`【考察】Lv.${toLv(e.consider)}`);
+  lines.push(`【直感】Lv.${toLv(e.intuition)}`);
+  lines.push(`【隠匿】Lv.${toLv(e.conceal)}`);
   lines.push("꧁——状態——꧂");
   lines.push("『』累積：");
   lines.push("꧁——永続——꧂");
