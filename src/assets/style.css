@@ -107,3 +107,69 @@
   [data-ui="revamp"] .btn,
   [data-ui="revamp"] .input { transition: none !important; }
 }
+
+/* ────── 和風テーマ : トークン（revampスコープの上書き） ────────────── */
+:root[data-ui="revamp"][data-theme="wa"]{
+  /* 墨色系・和金アクセント・和紙の面 */
+  --wa-ink:        #0f1115;
+  --wa-iron:       #1a1c22;
+  --wa-coal:       #24262d;
+  --wa-paper:      rgba(24,24,28,.75);
+  --wa-gold:       #d4b26a;     /* 落ち着いた金 */
+  --wa-crimson:    #b84a4a;     /* 朱 */
+  --wa-indigo:     #2f3e58;     /* 藍 */
+
+  /* 既存トークンを置き換え（質感はそのまま活用） */
+  --panel:         var(--wa-paper);
+  --panel-strong:  rgba(18,18,22,.70);
+  --panel-muted:   rgba(30,30,36,.45);
+
+  --border-subtle: 1px solid rgba(255,255,255,.08);
+  --border-strong: 1px solid rgba(255,255,255,.16);
+
+  --ring:     0 0 0 3px color-mix(in oklab, var(--wa-gold) 50%, transparent);
+  --ring-err: 0 0 0 3px color-mix(in oklab, var(--wa-crimson) 50%, transparent);
+}
+
+/* 和紙っぽい"繊維"のオーバーレイ（画像なしで表現） */
+:root[data-ui="revamp"][data-theme="wa"] body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(212,178,106,.08), transparent 60%),
+    radial-gradient(900px 500px  at -10% 20%, rgba(75,85,99,.10), transparent 60%),
+    repeating-linear-gradient(  7deg, rgba(255,255,255,.03) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient( 97deg, rgba(0,0,0,.05)     0 1px, transparent 1px 5px);
+  mix-blend-mode: overlay;
+}
+
+/* 見出し（和風） */
+:root[data-ui="revamp"][data-theme="wa"] .section-title,
+:root[data-ui="revamp"][data-theme="wa"] .acc-title{
+  letter-spacing:.06em;
+  color: color-mix(in oklab, var(--wa-gold) 92%, #fff 8%);
+  text-shadow: 0 0 0.5px rgba(212,178,106,.35);
+}
+
+/* 入力・ボタン：和色のリング＆ほのかな金のハイライト */
+:root[data-ui="revamp"][data-theme="wa"] .input:focus{
+  box-shadow: var(--ring);
+  border-color: color-mix(in oklab, var(--wa-gold) 45%, #93c5fd 10%);
+}
+:root[data-ui="revamp"][data-theme="wa"] .btn{
+  background: linear-gradient(180deg, rgba(50,50,58,.85), rgba(36,36,42,.85));
+  border-image: linear-gradient(90deg, transparent, rgba(212,178,106,.25), transparent) 1;
+}
+:root[data-ui="revamp"][data-theme="wa"] .btn:hover{ box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+
+/* HUD も和紙ガラス寄りに */
+:root[data-ui="revamp"][data-theme="wa"] aside{
+  background: rgba(16,16,20,.78) !important;
+  border: 1px solid rgba(212,178,106,.25) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45) !important;
+}
+
+/* 小さな金の仕切り線 */
+:root[data-ui="revamp"][data-theme="wa"] .divider-gold{
+  height:1px; width:100%;
+  background: linear-gradient(90deg, transparent, rgba(212,178,106,.35), transparent);
+}
