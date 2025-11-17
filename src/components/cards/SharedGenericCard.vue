@@ -43,6 +43,6 @@ const emit = defineEmits<{
 <style scoped>
 .flat-card { @apply p-0 bg-transparent border-none shadow-none; }
 .field { @apply flex flex-col gap-1; }
-.input { @apply px-3 py-2 rounded bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-500; }
-.input-fixed { @apply bg-zinc-950 border-zinc-800 text-zinc-500 italic; }
+.input { @apply input-wafu; }
+.input-fixed { @apply input-wafu opacity-60 italic pointer-events-none; }
 </style>

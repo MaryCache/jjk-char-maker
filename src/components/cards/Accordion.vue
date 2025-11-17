@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { ref, watch } from "vue";
 
 const props = withDefaults(defineProps<{
   title: string;
@@ -7,22 +7,30 @@ const props = withDefaults(defineProps<{
 }>(),{ defaultOpen: false });
 
 const open = ref(!!props.defaultOpen);
-watchEffect(() => { /* props変化対応 */ open.value = !!props.defaultOpen && open.value; });
+
+// props.defaultOpen の変化を監視（immediate 不要）
+watch(() => props.defaultOpen, (newVal) => {
+  open.value = !!newVal;
+});
 </script>
 
 <template>
-  <details :open="open" class="group rounded-2xl bg-zinc-900 border border-zinc-800">
+  <details :open="open" class="group card-wafu">
     <summary
       class="list-none select-none cursor-pointer px-4 py-3 rounded-2xl
              flex items-center justify-between gap-3
-             hover:bg-zinc-800/60 transition-colors"
+             hover:bg-zinc-800/20 transition-colors"
+      style="border-radius: inherit;"
+      tabindex="0"
       @click.prevent="open = !open"
+      @keydown.enter.prevent="open = !open"
+      @keydown.space.prevent="open = !open"
     >
       <h2 class="text-lg font-bold">{{ title }}</h2>
       <span
-        class="inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-600
-               transition-transform"
+        class="inline-flex h-6 w-6 items-center justify-center rounded-md border transition-transform"
         :class="{ 'rotate-90': open }"
+        style="border-color: var(--gold-soft); color: var(--gold);"
         aria-hidden="true"
       >›</span>
     </summary>

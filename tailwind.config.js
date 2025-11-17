@@ -4,7 +4,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        jp: ['"Noto Sans JP"', "system-ui", "sans-serif"],
+        jp: ['"Noto Serif JP"', "serif"],
+        sans: ['"Noto Serif JP"', "system-ui", "sans-serif"],
       },
     },
   },

@@ -3,7 +3,13 @@ export type Sex = "男" | "女" | "その他";
 
 export interface LearnedItem {
   name: string;
-  research: number; // 探究の値（1以上）
+  research: number; // 研究Lv（1～10）
+  _uid?: number; // 内部管理用の安定キー（TransitionGroup用）
+}
+
+// SectionCard 内部用の拡張型（外部には公開しない）
+export interface LearnedItemWithIndex extends LearnedItem {
+  _originalIdx: number; // 元配列のインデックス（内部使用のみ）
 }
 
 export interface GenericGroup {
