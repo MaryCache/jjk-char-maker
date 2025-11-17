@@ -173,3 +173,71 @@
   height:1px; width:100%;
   background: linear-gradient(90deg, transparent, rgba(212,178,106,.35), transparent);
 }
+
+/* ── JJK 和モード色トークン ───────────────── */
+:root{
+  --ink: #0e1014;         /* 背景(墨)       */
+  --panel: #14161b;       /* パネル         */
+  --panel-2:#101217;      /* パネル濃いめ   */
+  --line: #2a2e37;        /* 枠線           */
+  --line-soft:#20242c;    /* 薄い枠線       */
+  --gold: #d3b574;        /* 金（主）       */
+  --gold-2:#b89c64;       /* 金（影）       */
+  --gold-3:#6e5b33;       /* 金（深影）     */
+  --text-hi:#f6f2e6;      /* 高コントラスト */
+  --text:#d6d3ce;         /* 本文           */
+  --text-dim:#a7a4a0;     /* 補足           */
+}
+
+/* 色ユーティリティ（Tailwindと併用OK） */
+.bg-ink    { background: var(--ink); }
+.bg-panel  { background: var(--panel); }
+.bg-panel2 { background: var(--panel-2); }
+.border-subtle { border-color: var(--line); }
+.border-softer { border-color: var(--line-soft); }
+.text-gold { color: var(--gold); }
+.text-dim  { color: var(--text-dim); }
+
+/* 金の細縁と見出し用グラデの罫線 */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(211,181,116,.55), rgba(184,156,100,0));
+}
+
+/* 和見出しの装飾（角付きのカマボコ風） */
+.heading-wafu {
+  position: relative;
+  padding-left: 1.2rem;
+  color: var(--text-hi);
+}
+.heading-wafu::before{
+  content:"";
+  position:absolute; left:0; top:50%;
+  width:10px; height:10px; transform: translateY(-50%) rotate(45deg);
+  border:1px solid var(--gold-2);
+  background: linear-gradient(135deg, rgba(211,181,116,.18), transparent);
+  box-shadow: 0 0 0 1px rgba(184,156,100,.15) inset, 0 0 8px rgba(211,181,116,.15);
+}
+
+/* セクション外枠（角丸＆薄金縁） */
+.card-wafu {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border-radius: 14px;
+}
+
+/* アコーディオンのヘッダ/ボディの継ぎ目をシームレスに */
+.acc-head {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0));
+}
+.acc-body {
+  border-top: 1px solid var(--line-soft);
+}
+
+/* 金ボタン */
+.btn-gold {
+  color: #0b0c10;
+  background: linear-gradient(180deg, var(--gold), var(--gold-2));
+  border: 1px solid var(--gold-3);
+}
+.btn-gold:hover { filter: brightness(1.05); }
