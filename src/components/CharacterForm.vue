@@ -14,7 +14,7 @@ import PreviewTabs from "./cards/PreviewTabs.vue";
 import Accordion from "./cards/Accordion.vue";
 
 /* 定数 */
-const ranks: Rank[] = ["四級","三級","二級","一級","特級"];
+const ranks: Rank[] = ["四","三","二","一","特"];
 const sexes: Sex[]  = ["男","女","その他"];
 const FIXED_ART_NAME = "呪力操作";
 const LS_KEY = "jjk-char-maker:v1";
