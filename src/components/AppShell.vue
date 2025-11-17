@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import CharacterForm from "./CharacterForm.vue";
+defineSlots<{
+  default(props: {}): any;
+}>();
 </script>
 
 <template>
-  <div class="min-h-dvh grid grid-rows-[56px_1fr] bg-neutral-950 text-neutral-200">
+  <div class="app-shell min-h-dvh grid grid-rows-[56px_1fr] bg-neutral-950 text-neutral-200">
     <!-- ヘッダー -->
     <header class="px-4 flex items-center border-b border-white/10 bg-neutral-950/80 backdrop-blur-sm">
       <h1 class="font-semibold text-lg">呪術廻戦TRPG キャラ作成</h1>
@@ -14,7 +16,7 @@ import CharacterForm from "./CharacterForm.vue";
     <main class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 p-4 overflow-auto">
       <!-- 左列：フォーム -->
       <section class="card p-4">
-        <CharacterForm />
+        <slot />
       </section>
 
       <!-- 右列：HUD/プレビュー -->

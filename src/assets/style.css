@@ -4,4 +4,18 @@
 
 :root {
   color-scheme: dark;
+
+  /* デザイントークン */
+  --radius: 14px;
+  --radius-sm: 8px;
+  --elev-1: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --elev-2: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 新UIのカード類（AppShell 配下） */
+.app-shell .card {
+  border-radius: var(--radius);
+  box-shadow: var(--elev-1);
+  border: var(--border-subtle);
 }
