@@ -241,3 +241,70 @@
   border: 1px solid var(--gold-3);
 }
 .btn-gold:hover { filter: brightness(1.05); }
+
+/* === WAFU THEME – TOKENS (rev2) === */
+:root[data-ui="revamp"]{
+  /* 色（日本酒サイト参考の落ち着いた藍×金） */
+  --wafu-ink: #0e1016;
+  --wafu-sumi: #12141b;
+  --wafu-panel: #171a22;
+  --wafu-panel-2: #1b1f28;
+  --wafu-line: rgba(255,255,255,.06);
+  --wafu-line-soft: rgba(255,255,255,.04);
+
+  /* 金色系 */
+  --gold: #d9b56b;
+  --gold-soft: #c9a862;
+  --gold-dim: rgba(217,181,107,.25);
+
+  /* 影/グロー */
+  --ring-gold: 0 0 0 1px rgba(217,181,107,.28);
+  --shadow-soft: 0 6px 24px rgba(0,0,0,.35);
+}
+
+/* 和カード/見出し */
+[data-ui="revamp"] .card-wafu {
+  background: linear-gradient(180deg, var(--wafu-panel), var(--wafu-panel-2));
+  border: 1px solid var(--wafu-line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+[data-ui="revamp"] .heading-wafu { color: #e6e6e6; }
+[data-ui="revamp"] .text-gold { color: var(--gold); }
+
+/* 細金ルール（セクション仕切り） */
+[data-ui="revamp"] .rule-gold {
+  height: 1px;
+  background-image: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+/* 入力UI（ボーダー/フォーカスを金寄せに） */
+[data-ui="revamp"] .input, [data-ui="revamp"] select.input, [data-ui="revamp"] textarea.input {
+  border-color: var(--wafu-line);
+  background-color: #0f1218;
+}
+[data-ui="revamp"] .input:focus, [data-ui="revamp"] select.input:focus, [data-ui="revamp"] textarea.input:focus {
+  outline: none;
+  box-shadow: var(--ring-gold);
+  border-color: var(--gold-soft);
+}
+
+/* ボタン（地味ゴールド） */
+[data-ui="revamp"] .btn {
+  border: 1px solid var(--wafu-line);
+  background: #202532;
+}
+[data-ui="revamp"] .btn:hover {
+  border-color: var(--gold-dim);
+  box-shadow: var(--ring-gold);
+}
+
+/* HUD（右下フロート）微妙に金縁） */
+[data-ui="revamp"] .hud {
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+}
+
+/* Accordion ヘッダ/本文の色差解消 + 区切りのラインを金へ */
+[data-ui="revamp"] .acc-head { background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
+[data-ui="revamp"] .acc-body { border-top: 1px solid var(--wafu-line-soft); }

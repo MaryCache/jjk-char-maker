@@ -69,7 +69,7 @@ watch(()=>props.warn, (w)=>{
   <aside
     class="hidden sm:block fixed right-4 bottom-4 w-[340px] md:w-[380px] lg:w-[400px]
            bg-zinc-900/95 backdrop-blur rounded-2xl shadow-lg border border-zinc-700/70 p-4
-           text-[clamp(11px,0.95vw,14px)]"
+           text-[clamp(11px,0.95vw,14px)] hud"
     :class="{ 'animate-shake': warn }"
     aria-live="polite"
   >

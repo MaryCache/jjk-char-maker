@@ -34,10 +34,7 @@ const open = ref(!!props.defaultOpen);
     </div>
   </section>
 </template>
-
 <style scoped>
-/* スコープ内での微調整が必要な場合はこちらに */
-</style>
 .acc-root{
   border-radius: var(--radius);
   border: var(--border-subtle);
@@ -54,14 +51,11 @@ const open = ref(!!props.defaultOpen);
   box-shadow: inset 0 -10px 10px -12px rgba(0,0,0,.35); /* ほんのり段差 */
 }
 
-/* 和風テーマ時は金筋、通常は薄いグレーのグラデ仕切り */
+/* シンプルな金グラデにして parser の誤検出を避ける */
 .acc-head::after{
   content:""; position:absolute; left:10px; right:10px; bottom:0; height:1px;
-  background: linear-gradient(90deg,
-    transparent,
-    color-mix(in oklab, #d4b26a 35%, rgba(255,255,255,.28)) 35%,
-    transparent);
-  opacity:.7;
+  background: linear-gradient(90deg, transparent, rgba(211,181,116,.35), transparent);
+  opacity:.85;
 }
 :root:not([data-theme="wa"]) .acc-head::after{
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
