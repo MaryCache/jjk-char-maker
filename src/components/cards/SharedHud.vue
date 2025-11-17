@@ -217,4 +217,11 @@ watch(()=>props.warn, (w)=>{
 /* トースト */
 .toasty-enter-from,.toasty-leave-to{ opacity:0; transform:translateY(4px); }
 .toasty-enter-active,.toasty-leave-active{ transition: opacity .18s ease, transform .18s ease; }
+
+/* Revamp scope: enhance glass & elevation */
+:global([data-ui="revamp"]) aside{
+  background: rgba(12,12,14,.75) !important;
+  border: var(--border-strong) !important;
+  box-shadow: var(--elev-2) !important;
+}
 </style>

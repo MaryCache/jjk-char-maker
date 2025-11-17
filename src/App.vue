@@ -1,7 +1,18 @@
 <script setup lang="ts">
+import { onMounted, onBeforeUnmount } from 'vue'
 import CharacterForm from './components/CharacterForm.vue'
 import AppShell from './components/AppShell.vue'
+
 const uiRevamp = import.meta.env.VITE_UI_REVAMP === '1'
+
+onMounted(() => {
+  const root = document.documentElement
+  if (uiRevamp) root.setAttribute('data-ui', 'revamp')
+  else root.removeAttribute('data-ui')
+})
+onBeforeUnmount(() => {
+  document.documentElement.removeAttribute('data-ui')
+})
 </script>
 
 <template>

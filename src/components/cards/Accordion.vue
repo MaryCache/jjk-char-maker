@@ -1,38 +1,40 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
-
-const props = withDefaults(defineProps<{
-  title: string;
-  defaultOpen?: boolean;
-}>(),{ defaultOpen: false });
-
-const open = ref(!!props.defaultOpen);
-watchEffect(() => { /* props変化対応 */ open.value = !!props.defaultOpen && open.value; });
+import { ref } from 'vue'
+const props = defineProps<{ title: string; defaultOpen?: boolean }>()
+const open = ref(!!props.defaultOpen)
 </script>
 
 <template>
-  <details :open="open" class="group rounded-2xl bg-zinc-900 border border-zinc-800">
-    <summary
-      class="list-none select-none cursor-pointer px-4 py-3 rounded-2xl
-             flex items-center justify-between gap-3
-             hover:bg-zinc-800/60 transition-colors"
-      @click.prevent="open = !open"
-    >
-      <h2 class="text-lg font-bold">{{ title }}</h2>
-      <span
-        class="inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-600
-               transition-transform"
-        :class="{ 'rotate-90': open }"
-        aria-hidden="true"
-      >›</span>
-    </summary>
-    <div class="px-4 pb-4 pt-2">
-      <slot />
-    </div>
-  </details>
+  <div class="acc-root" :data-open="open">
+    <button class="acc-head" @click="open = !open">
+      <span class="acc-title">{{ title }}</span>
+      <span class="acc-icon" :class="{ 'rot': open }">▾</span>
+    </button>
+
+    <transition name="acc" appear>
+      <div v-show="open" class="acc-body">
+        <slot/>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <style scoped>
-/* iOS/Safariで<summary>マーカーを消す */
-summary::-webkit-details-marker { display: none; }
+.acc-root{ border-radius: var(--radius); border: var(--border-subtle); background: var(--panel); }
+.acc-head{
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border-bottom: var(--border-subtle);
+  background: rgba(34,34,40,.45);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.acc-title{ font-weight:700; letter-spacing:.04em; opacity:.92; }
+.acc-icon{ transition: transform .18s ease; }
+.acc-icon.rot{ transform: rotate(180deg); }
+.acc-body{ padding: 12px 14px; }
+
+/* 開閉アニメ */
+.acc-enter-from, .acc-leave-to { opacity:0; max-height:0; }
+.acc-enter-active, .acc-leave-active {
+  transition: opacity .18s ease, max-height .18s ease;
+}
 </style>

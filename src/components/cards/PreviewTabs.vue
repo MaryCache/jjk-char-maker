@@ -42,4 +42,22 @@ function onCopy(txt: string, id: string) {
 
 <style scoped>
 .card { @apply bg-zinc-900 rounded-2xl p-4 shadow; }
+
+/* Revamp tabs enhancement */
+:global([data-ui="revamp"]) .tabs{
+  display:flex; gap:6px; padding:6px; border-radius: var(--radius);
+  border: var(--border-subtle); background: rgba(16,16,20,.45);
+}
+:global([data-ui="revamp"]) .tab{
+  padding: 6px 10px; border-radius: 10px; border: var(--border-subtle);
+  background: rgba(30,30,36,.45); cursor:pointer; user-select:none;
+  transition: background-color .12s ease, box-shadow .12s ease;
+}
+:global([data-ui="revamp"]) .tab:hover{ box-shadow: var(--elev-1); }
+:global([data-ui="revamp"]) .tab[aria-selected="true"]{
+  background: rgba(40,40,48,.65);
+  box-shadow: var(--elev-1);
+  outline: none;
+}
+:global([data-ui="revamp"]) .panel{ margin-top:10px; border-radius: var(--radius); border: var(--border-subtle); background: rgba(12,12,14,.6); }
 </style>

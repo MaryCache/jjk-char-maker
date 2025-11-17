@@ -18,3 +18,92 @@
   border: var(--border-subtle);
   box-shadow: var(--elev-0);
 }
+
+/* ===== Revamp design tokens (scoped) ===== */
+:root[data-ui="revamp"]{
+  --radius-outer: 16px;
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --border-subtle: 1px solid rgba(255,255,255,.08);
+  --border-strong: 1px solid rgba(255,255,255,.16);
+
+  --elev-0: 0 0 0 rgba(0,0,0,0);
+  --elev-1: 0 6px 24px rgba(0,0,0,.25);
+  --elev-2: 0 10px 36px rgba(0,0,0,.35);
+
+  --panel: rgba(20,20,24,.55);
+  --panel-strong: rgba(12,12,14,.55);
+  --panel-muted: rgba(30,30,36,.45);
+
+  --ring: 0 0 0 3px rgba(147,197,253,.25);
+  --ring-err: 0 0 0 3px rgba(248,113,113,.28);
+}
+
+/* ===== Cards / Surfaces ===== */
+[data-ui="revamp"] .card{
+  border-radius: var(--radius);
+  border: var(--border-subtle);
+  background: var(--panel);
+  box-shadow: var(--elev-0);
+  backdrop-filter: blur(8px);
+}
+
+[data-ui="revamp"] .flat-card{
+  border-radius: var(--radius);
+  border: var(--border-subtle);
+  background: var(--panel);
+  box-shadow: var(--elev-0);
+  backdrop-filter: blur(8px);
+  padding: 12px;
+}
+
+/* ===== Inputs / Selects / Textareas ===== */
+[data-ui="revamp"] .input{
+  border-radius: 10px;
+  background: rgba(24,24,27,.75);
+  border: var(--border-subtle);
+  transition: box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+}
+[data-ui="revamp"] .input:focus{
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: rgba(147,197,253,.45);
+  background: rgba(28,28,32,.9);
+}
+
+/* ===== Buttons ===== */
+[data-ui="revamp"] .btn{
+  border-radius: 10px;
+  border: var(--border-subtle);
+  background: linear-gradient(180deg, rgba(53,53,60,.85), rgba(40,40,46,.85));
+  transition: transform .06s ease, box-shadow .12s ease, background-color .15s ease;
+}
+[data-ui="revamp"] .btn:hover{ box-shadow: var(--elev-1); transform: translateY(-1px); }
+[data-ui="revamp"] .btn:active{ transform: translateY(0); box-shadow: var(--elev-0); }
+
+/* ===== Badges ===== */
+[data-ui="revamp"] .badge{
+  border-radius: 999px;
+  border: var(--border-subtle);
+  background: rgba(28,28,32,.7);
+  padding: 4px 10px;
+}
+
+/* ===== Field label / hint ===== */
+[data-ui="revamp"] .field > span{
+  font-size: .8rem; opacity: .78; letter-spacing: .02em;
+}
+
+/* ===== Dividers / Section title ===== */
+[data-ui="revamp"] .section-title{
+  font-size: .95rem; font-weight: 600; letter-spacing: .04em;
+  padding: 2px 0 8px 0; margin-bottom: 8px;
+  border-bottom: var(--border-subtle);
+}
+
+/* ===== Motion preferences ===== */
+@media (prefers-reduced-motion: reduce) {
+  [data-ui="revamp"] .btn,
+  [data-ui="revamp"] .input { transition: none !important; }
+}
