@@ -308,3 +308,67 @@
 /* Accordion ヘッダ/本文の色差解消 + 区切りのラインを金へ */
 [data-ui="revamp"] .acc-head { background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
 [data-ui="revamp"] .acc-body { border-top: 1px solid var(--wafu-line-soft); }
+
+/* === WAFU THEME – rev3 (gold accents tuned) === */
+:root{
+  /* 背景をより深い藍へ（サイト全体） */
+  --wafu-bg: #0c0f15;         /* ← 新しい背景 */
+  --wafu-ink:#0e1016;
+  --wafu-sumi:#12141b;
+  --wafu-panel:#151923;
+  --wafu-panel-2:#1a1f2a;
+  --wafu-line:rgba(255,255,255,.06);
+  --wafu-line-soft:rgba(255,255,255,.04);
+
+  --gold:#d9b56b;
+  --gold-soft:#c9a862;
+  --gold-dim:rgba(217,181,107,.25);
+
+  --ring-gold:0 0 0 1px rgba(217,181,107,.28);
+  --shadow-soft:0 6px 24px rgba(0,0,0,.35);
+}
+
+/* 背景一括適用（レイアウトのbody/ルートに付与） */
+.app-bg{ background: radial-gradient(1200px 800px at 20% -10%, rgba(217,181,107,.04), transparent 60%), var(--wafu-bg); }
+
+/* 見出し＆数字カラー */
+.heading-wafu{ color:#e8e8e8; }
+.text-gold{ color:var(--gold); }
+.num-gold{ color:var(--gold); font-variant-numeric: tabular-nums; }
+
+/* カード/区切り/フォーム */
+.card-wafu{
+  background: linear-gradient(180deg,var(--wafu-panel),var(--wafu-panel-2));
+  border:1px solid var(--wafu-line);
+  border-radius:14px; box-shadow:var(--shadow-soft);
+}
+.rule-gold{ height:1px; background-image:linear-gradient(90deg,transparent,var(--gold-dim),transparent); }
+
+.input, select.input, textarea.input{
+  border-color:var(--wafu-line); background-color:#0f1218;
+}
+.input:focus, select.input:focus, textarea.input:focus{
+  outline:none; box-shadow:var(--ring-gold); border-color:var(--gold-soft);
+}
+.btn{ border:1px solid var(--wafu-line); background:#202532; }
+.btn:hover{ border-color:var(--gold-dim); box-shadow:var(--ring-gold); }
+
+/* HUD（金縁と数値色） */
+.hud{ border:1px solid var(--gold-dim); box-shadow:0 12px 40px rgba(0,0,0,.45); }
+.hud .num{ color:var(--gold); font-variant-numeric: tabular-nums; }
+
+/* プレビュー領域（右側）も色反映 */
+.preview-pane{ background:#0d1117; border:1px solid var(--wafu-line); }
+.preview-tabs .tab{
+  border:1px solid var(--wafu-line); background:#1b2130;
+}
+.preview-tabs .tab.is-active{
+  border-color:var(--gold-dim); box-shadow:var(--ring-gold); color:var(--gold);
+}
+
+/* Accordion：ヘッダと本文のなじみ/境界線 */
+.acc-head{ background:linear-gradient(180deg,rgba(255,255,255,.02),transparent); }
+.acc-body{ border-top:1px solid var(--wafu-line-soft); }
+
+/* 全体の余白＆細部 */
+.border-subtle{ border-color:var(--wafu-line); }

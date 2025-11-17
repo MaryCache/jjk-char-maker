@@ -176,11 +176,11 @@ watch(state,(v)=>{ try{
         </div>
       </Accordion>
 
-      <!-- 総合力：見出しナシ、右寄せバッジ -->
-      <section class="card-wafu px-4 py-3 flex items-center justify-end">
-        <div class="text-2xl font-bold tracking-wide">
-          <span class="text-gold mr-2">総合力</span>
-          <span class="tabular-nums">{{ totalComputed }}</span>
+      <!-- 総合力：見出しナシ、左寄せバッジ -->
+      <section class="card-wafu px-4 py-3">
+        <div class="text-2xl font-bold tracking-wide flex items-baseline gap-2">
+          <span class="text-gold">総合力</span>
+          <span class="num-gold">{{ totalComputed }}</span>
         </div>
       </section>
 

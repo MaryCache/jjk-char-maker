@@ -75,7 +75,7 @@ watch(()=>props.warn, (w)=>{
   >
     <header class="flex items-baseline justify-between mb-3">
       <h3 class="text-sm opacity-80">総合力</h3>
-      <div class="text-2xl font-bold tabular-nums">{{ total }}</div>
+      <div class="text-2xl font-bold tabular-nums num">{{ total }}</div>
     </header>
 
     <!-- 枠 -->

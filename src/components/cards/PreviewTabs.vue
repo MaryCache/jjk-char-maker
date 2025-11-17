@@ -17,13 +17,13 @@ function onCopy(txt: string, id: string) {
 </script>
 
 <template>
-  <section class="card">
+  <section class="card preview-pane">
     <div class="flex items-center justify-between mb-2">
-      <div class="flex gap-2">
+      <div class="preview-tabs flex gap-2">
         <button
           v-for="t in tabs" :key="t.id"
-          class="px-3 py-1 rounded-md text-sm border"
-          :class="current===t.id ? 'bg-zinc-700 border-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700'"
+          class="tab px-3 py-1 rounded-md text-sm"
+          :class="current===t.id ? 'is-active' : ''"
           @click="current=t.id"
         >{{ t.label }}</button>
       </div>

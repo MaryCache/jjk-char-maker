@@ -12,20 +12,12 @@ const open = ref(!!props.defaultOpen);
 <template>
   <section class="card-wafu overflow-hidden">
     <!-- ヘッダ -->
-    <button
-      class="w-full acc-head px-4 py-3 flex items-center justify-between select-none"
-      @click="open = !open"
-    >
-      <div class="heading-wafu text-sm tracking-wide">
-        <span class="text-gold mr-2">──</span>{{ title }}<span class="text-gold ml-2">──</span>
-      </div>
-      <svg class="w-3 h-3 text-gold transition-transform"
-           :class="{ 'rotate-180': open }" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/>
-      </svg>
+    <button class="w-full acc-head px-4 py-3 flex items-center justify-between select-none" @click="open = !open">
+      <span class="text-gold">꧁</span>
+      <div class="heading-wafu text-sm tracking-wide text-center flex-1">{{ title }}</div>
+      <span class="text-gold">꧂</span>
     </button>
 
-    <!-- 装飾の金ライン -->
     <div class="rule-gold"></div>
 
     <!-- 本文 -->
