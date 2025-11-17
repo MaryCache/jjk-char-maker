@@ -7,6 +7,13 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
+  /* デザイントークン */
+  --radius: 16px;
+  --radius-sm: 8px;
+  --elev-1: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --elev-2: 0 12px 48px rgba(0, 0, 0, 0.5);
+  --border-subtle: 1px solid rgba(255, 255, 255, 0.1);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
