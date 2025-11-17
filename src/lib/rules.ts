@@ -6,7 +6,7 @@ export const halfRoundUp = (v: number) => Math.max(1, Math.ceil(v / 2));
 /** 呪力量（実値）= 割り振り値 * 5 */
 export const poolFromAlloc = (alloc: number) => Math.max(1, alloc) * 5;
 
-/** 探査プレビュー算出（実値のまま保持） */
+/** 探査プレビュー算出（実値） */
 export function explorationScores(h: HumanStats) {
   const zanEiOrVisual = (h.int + h.sense) * 5;
   const chase = h.agi * 10;
@@ -15,6 +15,9 @@ export function explorationScores(h: HumanStats) {
   const conceal = (h.int + h.agi) * 5;
   return { zanEi: zanEiOrVisual, chase, consider, intuition, conceal };
 }
+
+/** 実値→Lv変換（10刻み、Lv.1以上） */
+const toLv = (v:number) => Math.max(1, Math.round(v / 10));
 
 /** 成長上限（通常6ステ） */
 function capBasic(initial: number) {
@@ -43,14 +46,9 @@ export function growthCaps(h: HumanStats, j: JujutsuStats) {
   };
 }
 
-/* ──────────────────────────────────────────────────────────
- * ユーティリティ：UIと同じ使用量の算出
- *   - 体術: 使った枠＝items.length
- *           使った習得力＝Σ max(0, research-1)
- *   - 呪術: 『呪力操作』は枠/習得力を消費しない
- * ────────────────────────────────────────────────────────── */
+/* UI使用量集計 */
 const FIXED_ART_NAME = "呪力操作";
-const BRK = "``````"; // セクション区切り（6バッククォート）
+const BRK = "``````"; // セクション区切り
 
 function usageFromSheet(c: CharacterSheet) {
   const bodyItems = c.body?.items ?? [];
@@ -65,29 +63,17 @@ function usageFromSheet(c: CharacterSheet) {
 
   const usedSlotsTotal = usedSlotsBody + usedSlotsArts;
 
-  const slotsTotal =
-    (c.generic?.slots ?? 0) + (c.generic?.slotsAdjust ?? 0);
-  const capTotal =
-    (c.generic?.capacity ?? 0) + (c.generic?.capacityAdjust ?? 0);
+  const slotsTotal = (c.generic?.slots ?? 0) + (c.generic?.slotsAdjust ?? 0);
+  const capTotal    = (c.generic?.capacity ?? 0) + (c.generic?.capacityAdjust ?? 0);
 
   const usedCapTotal = usedCapBody + usedCapArts;
 
   return {
-    bodyItems,
-    artsAll,
-    artsUser,
-
-    usedSlotsBody,
-    usedCapBody,
-
-    usedSlotsArts,
-    usedCapArts,
-
-    usedSlotsTotal,
-    usedCapTotal,
-
-    slotsTotal,
-    capTotal,
+    bodyItems, artsAll, artsUser,
+    usedSlotsBody, usedCapBody,
+    usedSlotsArts, usedCapArts,
+    usedSlotsTotal, usedCapTotal,
+    slotsTotal, capTotal,
   };
 }
 
@@ -102,7 +88,7 @@ export function buildText1(c: CharacterSheet) {
   lines.push(`名前：${c.name ?? ""}${c.ruby ? `（${c.ruby}）` : ""}`);
   lines.push(`性別：${c.sex ?? ""}`);
   lines.push(`年齢：${c.age ?? 0}`);
-  lines.push(`階級：${c.rank ?? ""}`);
+  lines.push(`階級：${c.rank ?? ""}級`);
   lines.push(`総合力：${c.total ?? 0}`);
   lines.push("꧁——人物紹介——꧂");
   lines.push((c.bio && c.bio.trim()) ? c.bio.trim() : "（未記入）");
@@ -147,7 +133,7 @@ export function buildText1(c: CharacterSheet) {
   lines.push(`習得枠：${u.usedSlotsTotal}/${u.slotsTotal}`);
   lines.push(`習得力：${u.usedCapTotal}/${u.capTotal}`);
 
-  // 体術 内訳（使用値のみ表示）
+  // 体術 内訳
   lines.push("꧁——汎用体術——꧂");
   lines.push(`習得枠：${u.usedSlotsBody}`);
   lines.push(`習得力：${u.usedCapBody}`);
@@ -155,7 +141,7 @@ export function buildText1(c: CharacterSheet) {
     u.bodyItems.forEach(i => lines.push(`『${i.name}』【${i.research ?? 1}】`));
   }
 
-  // 呪術 内訳（固定の呪力操作は表示はするが消費は0）
+  // 呪術 内訳（固定は表示のみ消費0）
   lines.push("꧁——汎用呪術——꧂");
   lines.push(`習得枠：${u.usedSlotsArts}`);
   lines.push(`習得力：${u.usedCapArts}`);
@@ -167,10 +153,7 @@ export function buildText1(c: CharacterSheet) {
   return lines.join("\n").trim();
 }
 
-/* 百分率→レベル(1–10相当)に丸める。0 を許容したいなら Math.max(0, …) に変更してね。*/
-const toLv = (v: number) => Math.max(1, Math.round(v / 10));
-
-/** テキスト２：状態管理 */
+/** テキスト２：状態管理（探査はLv表記） */
 export function buildText2(c: CharacterSheet) {
   const e = explorationScores(c.human);
   const lines: string[] = [];

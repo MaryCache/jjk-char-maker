@@ -4,6 +4,8 @@ export type Sex = "男" | "女" | "その他";
 export interface LearnedItem {
   name: string;
   research: number; // 探究の値（1以上）
+  /** @internal 非列挙UID。ランタイムで Object.defineProperty 付与、JSON保存には含まれない想定 */
+  __k?: number;
 }
 
 export interface GenericGroup {
