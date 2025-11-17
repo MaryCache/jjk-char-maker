@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { TransitionGroup } from "vue";
 
-/* テンプレ側だけで参照するので、変数に受けずに型宣言のみ */
+/* 親から受け取るデータ（テンプレ内のみ参照） */
 defineProps<{
   items: { name: string; research: number }[];
   usedSlots: number;
@@ -21,7 +21,6 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <!-- フラット化 -->
   <section class="flat-card">
     <div class="flex items-center justify-between mb-3">
       <div class="grid grid-cols-2 gap-3 items-end">
@@ -37,8 +36,9 @@ const emit = defineEmits<{
       <button class="btn" @click="$emit('add')">＋</button>
     </div>
 
+    <!-- :key は「非列挙UID(__k)」があればそれを使う -->
     <TransitionGroup name="skill" tag="div" class="space-y-2">
-      <div v-for="(it,i) in items" :key="i + ':' + it.name" class="flex gap-2">
+      <div v-for="(it,i) in items" :key="(it as any).__k ?? i" class="flex gap-2">
         <input class="input flex-1" placeholder="名前" :value="it.name"
                @input="$emit('update:name', i, ($event.target as HTMLInputElement).value)" />
         <input class="input w-24" type="number" min="1" :value="it.research"

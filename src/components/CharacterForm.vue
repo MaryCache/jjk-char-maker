@@ -13,11 +13,23 @@ import SingleItemCard from "./cards/SingleItemCard.vue";
 import PreviewTabs from "./cards/PreviewTabs.vue";
 import Accordion from "./cards/Accordion.vue";
 
+/* 定数 */
 const ranks: Rank[] = ["四","三","二","一","特"];
 const sexes: Sex[]  = ["男","女","その他"];
 const FIXED_ART_NAME = "呪力操作";
 const LS_KEY = "jjk-char-maker:v1";
 
+/* 非列挙UID（JSONに混ざらない） */
+let uidCounter = 1;
+function ensureUid<T extends object>(it: T): T {
+  const anyIt = it as any;
+  if (anyIt && typeof anyIt === "object" && !Object.prototype.hasOwnProperty.call(anyIt, "__k")) {
+    Object.defineProperty(anyIt, "__k", { value: uidCounter++, enumerable: false, writable: false });
+  }
+  return it;
+}
+
+/* 状態 */
 const state = reactive({
   poolAlloc: 4,
   hasInnate: false,
@@ -29,11 +41,12 @@ const state = reactive({
     innate: [] as LearnedItem[], traits: [] as LearnedItem[],
     generic: { slots: 2, capacity: 4, slotsAdjust: 0, capacityAdjust: 0 },
     body: { slotsMax: 2, slotsUsed: 0, capacity: 2, capacityBase: 2, items: [] as LearnedItem[] },
-    arts:  { slotsMax: 2, slotsUsed: 0, capacity: 2, capacityBase: 2,
-             items: [{ name: FIXED_ART_NAME, research: 1 }] as LearnedItem[] },
+    arts: { slotsMax: 2, slotsUsed: 0, capacity: 2, capacityBase: 2,
+            items: [{ name: FIXED_ART_NAME, research: 1 }] as LearnedItem[] },
   } as CharacterSheet,
 });
 
+/* 基準 */
 function baseByMax(i:number,s:number){ return halfRoundUp(Math.max(i,s)); }
 function genericCapacity(i:number,s:number){ return baseByMax(i,s); }
 
@@ -42,11 +55,13 @@ const totalComputed = computed(()=> state.sheet.human.life + state.sheet.human.s
                                   state.sheet.human.int + state.sheet.human.sense + state.poolAlloc +
                                   state.sheet.jujutsu.maxOutput);
 
+/* 固定技の担保 */
 function ensureFixedArt(){
   const exists = state.sheet.arts.items.some(i=>i.name===FIXED_ART_NAME);
   if(!exists) state.sheet.arts.items.unshift({ name: FIXED_ART_NAME, research: 1 });
 }
 
+/* 使用量 */
 const usedSlotsBody  = computed(()=> state.sheet.body.items.length);
 const artsUserItems  = computed(()=> state.sheet.arts.items.filter(i=> i.name!== FIXED_ART_NAME));
 const usedSlotsArts  = computed(()=> artsUserItems.value.length);
@@ -60,6 +75,7 @@ const capTotal   = computed(()=> state.sheet.generic.capacity + state.sheet.gene
 const overSlots  = computed(()=> usedSlotsTotal.value > slotsTotal.value);
 const overCap    = computed(()=> usedCapTotal.value   > capTotal.value);
 
+/* 派生同期 */
 function syncDerived(){
   state.sheet.jujutsu.pool = poolFromAlloc(state.poolAlloc);
 
@@ -79,7 +95,7 @@ function syncDerived(){
 
   ensureFixedArt();
 
-  // 1件制限（non-null を明示）
+  // 1件制限（必ず0か1に正規化）
   if(!state.hasInnate) state.sheet.innate = [];
   else if(state.sheet.innate.length===0) state.sheet.innate=[{name:"",research:1}];
   else state.sheet.innate=[state.sheet.innate[0]!];
@@ -90,8 +106,8 @@ function syncDerived(){
 }
 syncDerived();
 
-/* CRUD（安全ガード付き） */
-function addBodyItem(){ state.sheet.body.items.push({ name:"", research:1 }); }
+/* CRUD（UID付与） */
+function addBodyItem(){ state.sheet.body.items.push(ensureUid({ name:"", research:1 })); }
 function removeBodyItem(i:number){ state.sheet.body.items.splice(i,1); }
 function updateBodyName(i:number,v:string){
   const it = state.sheet.body.items[i]; if (it) it.name = v;
@@ -100,15 +116,20 @@ function updateBodyResearch(i:number,v:number){
   const it = state.sheet.body.items[i]; if (it) it.research = v;
 }
 
-function addArtsItem(){ state.sheet.arts.items.push({ name:"", research:1 }); }
+function addArtsItem(){ state.sheet.arts.items.push(ensureUid({ name:"", research:1 })); }
 function removeArtsItem(iUser:number){ state.sheet.arts.items.splice(iUser+1,1); }
 function updateArtsName(iUser:number,v:string){
-  const it = state.sheet.arts.items[iUser+1]; if (it) it.name = v;
+  const idx = iUser + 1;
+  const it = state.sheet.arts.items[idx];
+  if (it) it.name = v;
 }
 function updateArtsResearch(iUser:number,v:number){
-  const it = state.sheet.arts.items[iUser+1]; if (it) it.research = v;
+  const idx = iUser + 1;
+  const it = state.sheet.arts.items[idx];
+  if (it) it.research = v;
 }
 
+/* テキスト */
 const text1 = computed(()=> buildText1({ ...state.sheet, total: totalComputed.value }));
 const text2 = computed(()=> buildText2({ ...state.sheet, total: totalComputed.value }));
 const text3 = computed(()=> buildText3({ ...state.sheet, total: totalComputed.value }));
@@ -118,6 +139,7 @@ const tabs  = computed(()=>([
   { id:"t3", label:"成長管理",     text:text3.value },
 ]));
 
+/* リセット */
 function confirmReset(){ if(window.confirm("全リセットします。よろしいですか？")) resetTotal28(); }
 function resetTotal28(){
   state.sheet.name=""; state.sheet.ruby=""; state.sheet.bio="";
@@ -130,6 +152,7 @@ function resetTotal28(){
   syncDerived(); localStorage.removeItem(LS_KEY);
 }
 
+/* 起動時：復元＋既存アイテムへUID付与 */
 onMounted(()=> {
   try{
     const raw = localStorage.getItem(LS_KEY);
@@ -139,17 +162,34 @@ onMounted(()=> {
       state.poolAlloc = saved.poolAlloc ?? state.poolAlloc;
       state.hasInnate = Array.isArray(state.sheet.innate)&&state.sheet.innate.length>0;
       state.hasTrait  = Array.isArray(state.sheet.traits)&&state.sheet.traits.length>0;
-      ensureFixedArt(); syncDerived();
+      ensureFixedArt();
     }
   }catch{}
+  // UIDを後付け（非列挙なので保存には出ない）
+  state.sheet.body.items = state.sheet.body.items.map(ensureUid);
+  state.sheet.arts.items = state.sheet.arts.items.map(it =>
+    it.name === FIXED_ART_NAME ? it : ensureUid(it)
+  );
+  syncDerived();
 });
-watch(state,(v)=>{ try{
-  localStorage.setItem(LS_KEY, JSON.stringify({ poolAlloc:v.poolAlloc, sheet:v.sheet }));
-}catch{} },{deep:true});
+
+/* watch：計算は狙い撃ち、保存はdeep+debounce */
+watch(() => [state.sheet.human.int, state.sheet.human.sense], syncDerived);
+watch(() => state.poolAlloc, () => { state.sheet.jujutsu.pool = poolFromAlloc(state.poolAlloc); });
+watch(() => [state.hasInnate, state.hasTrait], syncDerived);
+
+let saveT: number | null = null;
+watch(state,(v)=>{
+  if (saveT) clearTimeout(saveT);
+  saveT = window.setTimeout(()=>{
+    try{ localStorage.setItem(LS_KEY, JSON.stringify({ poolAlloc:v.poolAlloc, sheet:v.sheet })); }catch{}
+  },120);
+},{deep:true});
 </script>
 
 <template>
   <div class="max-w-[1200px] mx-auto grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <!-- 左列 -->
     <div class="space-y-4">
       <Accordion title="꧁——人物情報——꧂" :defaultOpen="true">
         <div class="relative">
@@ -202,7 +242,7 @@ watch(state,(v)=>{ try{
         </div>
       </Accordion>
 
-      <!-- 生得術式（keyを固定し同一インスタンスを維持） -->
+      <!-- 生得術式 -->
       <Accordion title="꧁——生得術式——꧂" :defaultOpen="true">
         <Transition name="skill">
           <div class="w-full" :key="'innate-static'">
@@ -210,13 +250,20 @@ watch(state,(v)=>{ try{
               :enabled="state.hasInnate"
               :item="state.sheet.innate[0] ?? null"
               @update:enabled="(v:boolean)=>{ state.hasInnate=v; syncDerived(); }"
-              @update:name   ="(v:string)=>{ if(!state.sheet.innate.length) state.sheet.innate=[{name:v,research:1}]; else state.sheet.innate[0]!.name=v; }"
-              @update:research="(v:number)=>{ if(!state.sheet.innate.length) state.sheet.innate=[{name:'',research:v}]; else state.sheet.innate[0]!.research=v; }"
+              @update:name   ="(v:string)=>{
+                if(!state.sheet.innate.length) state.sheet.innate=[{name:v,research:1}];
+                else state.sheet.innate[0]!.name=v;
+              }"
+              @update:research="(v:number)=>{
+                if(!state.sheet.innate.length) state.sheet.innate=[{name:'',research:v}];
+                else state.sheet.innate[0]!.research=v;
+              }"
             />
           </div>
         </Transition>
       </Accordion>
 
+      <!-- 呪力特性 -->
       <Accordion title="꧁——呪力特性——꧂" :defaultOpen="true">
         <Transition name="skill">
           <div class="w-full" :key="'trait-static'">
@@ -224,13 +271,20 @@ watch(state,(v)=>{ try{
               :enabled="state.hasTrait"
               :item="state.sheet.traits[0] ?? null"
               @update:enabled="(v:boolean)=>{ state.hasTrait=v; syncDerived(); }"
-              @update:name   ="(v:string)=>{ if(!state.sheet.traits.length) state.sheet.traits=[{name:v,research:1}]; else state.sheet.traits[0]!.name=v; }"
-              @update:research="(v:number)=>{ if(!state.sheet.traits.length) state.sheet.traits=[{name:'',research:v}]; else state.sheet.traits[0]!.research=v; }"
+              @update:name   ="(v:string)=>{
+                if(!state.sheet.traits.length) state.sheet.traits=[{name:v,research:1}];
+                else state.sheet.traits[0]!.name=v;
+              }"
+              @update:research="(v:number)=>{
+                if(!state.sheet.traits.length) state.sheet.traits=[{name:'',research:v}];
+                else state.sheet.traits[0]!.research=v;
+              }"
             />
           </div>
         </Transition>
       </Accordion>
 
+      <!-- 共有（汎用） -->
       <Accordion title="꧁——汎用（共有）——꧂" :defaultOpen="true">
         <SharedGenericCard
           :base-slots="state.sheet.generic.slots"
@@ -242,6 +296,7 @@ watch(state,(v)=>{ try{
         />
       </Accordion>
 
+      <!-- 汎用体術 -->
       <Accordion title="꧁——汎用体術——꧂" :defaultOpen="true">
         <SectionCard
           :items="state.sheet.body.items"
@@ -258,6 +313,7 @@ watch(state,(v)=>{ try{
         />
       </Accordion>
 
+      <!-- 汎用呪術 -->
       <Accordion title="꧁——汎用呪術——꧂" :defaultOpen="true">
         <section class="flat-card">
           <div class="flex items-center justify-between mb-3">
@@ -274,14 +330,16 @@ watch(state,(v)=>{ try{
             <button class="btn" @click="addArtsItem">＋</button>
           </div>
 
+          <!-- 固定：呪力操作 -->
           <div class="flex gap-2 opacity-80">
             <input disabled :value="FIXED_ART_NAME" class="input input-fixed flex-1" />
             <input disabled type="number" :value="1" class="input input-fixed w-24" />
             <button disabled class="btn opacity-50 cursor-not-allowed">固定</button>
           </div>
 
+          <!-- 追加分：キーは非列挙UID -->
           <TransitionGroup name="skill" tag="div" class="space-y-2 mt-2">
-            <div v-for="(it, i) in artsUserItems" :key="'arts-'+i+':'+it.name" class="flex gap-2">
+            <div v-for="(it, i) in artsUserItems" :key="(it as any).__k ?? i" class="flex gap-2">
               <input class="input flex-1" placeholder="名前" :value="it.name"
                      @input="updateArtsName(i, ($event.target as HTMLInputElement).value)" />
               <input class="input w-24" type="number" min="1" :value="it.research"
@@ -293,10 +351,12 @@ watch(state,(v)=>{ try{
       </Accordion>
     </div>
 
+    <!-- 右列：テキスト -->
     <div class="space-y-4">
       <PreviewTabs :tabs="tabs" @copy="() => {}" />
     </div>
 
+    <!-- HUD -->
     <SharedHud
       :total="totalComputed"
       :used-slots-total="usedSlotsTotal"
