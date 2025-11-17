@@ -20,7 +20,6 @@ const open = ref(!!props.defaultOpen)
 </template>
 
 <style scoped>
-/* ここを統一：ヘッダとボディを同じ面色に、線とインセット影で分ける */
 .acc-root{
   border-radius: var(--radius);
   border: var(--border-subtle);
@@ -28,14 +27,28 @@ const open = ref(!!props.defaultOpen)
   overflow: clip;
 }
 
-/* ヘッダは面色そのまま。薄い下線＋内側シャドウで段差表現 */
+/* ヘッダは面色そのまま。物理の下線はナシ、疑似要素で繊細ライン */
 .acc-head{
   width:100%; display:flex; align-items:center; justify-content:space-between;
   padding:12px 14px;
-  background: transparent;               /* ← ここ重要：ボディと同じ */
-  border-bottom: var(--border-subtle);   /* 線で区切る */
-  box-shadow: inset 0 -10px 10px -12px rgba(0,0,0,.35);
+  background: transparent;            /* ← ボディと同じ色 */
+  position: relative;
+  box-shadow: inset 0 -10px 10px -12px rgba(0,0,0,.35); /* ほんのり段差 */
 }
+
+/* 和風テーマ時は金筋、通常は薄いグレーのグラデ仕切り */
+.acc-head::after{
+  content:""; position:absolute; left:10px; right:10px; bottom:0; height:1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in oklab, #d4b26a 35%, rgba(255,255,255,.28)) 35%,
+    transparent);
+  opacity:.7;
+}
+:root:not([data-theme="wa"]) .acc-head::after{
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+}
+
 .acc-title{ font-weight:700; letter-spacing:.04em; opacity:.92; }
 .acc-icon{ transition: transform .18s ease; }
 .acc-icon.rot{ transform: rotate(180deg); }
@@ -44,7 +57,5 @@ const open = ref(!!props.defaultOpen)
 
 /* 開閉アニメ（高さ＋透明度） */
 .acc-enter-from, .acc-leave-to { opacity:0; max-height:0; }
-.acc-enter-active, .acc-leave-active {
-  transition: opacity .18s ease, max-height .18s ease;
-}
+.acc-enter-active, .acc-leave-active { transition: opacity .18s ease, max-height .18s ease; }
 </style>

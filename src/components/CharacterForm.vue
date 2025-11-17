@@ -176,9 +176,16 @@ watch(state,(v)=>{ try{
         </div>
       </Accordion>
 
-      <Accordion title="総合力" :defaultOpen="true">
-        <div class="text-xl font-bold">総合力：<span class="tabular-nums">{{ totalComputed }}</span></div>
-      </Accordion>
+      <!-- 総合力：ヘッダ無しステータスカード -->
+      <div class="flex items-center justify-between rounded-xl border px-4 py-3
+                  bg-[var(--panel)] [border:var(--border-subtle)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <span class="opacity-80 font-semibold tracking-wide">総合力</span>
+        <span class="tabular-nums text-2xl font-extrabold
+                     bg-gradient-to-b from-white to-zinc-200 bg-clip-text text-transparent
+                     drop-shadow-[0_0_.5px_rgba(255,255,255,.35)]">
+          {{ totalComputed }}
+        </span>
+      </div>
 
       <Accordion title="꧁——人間強度——꧂" :defaultOpen="true">
         <div class="grid grid-cols-5 gap-3">
