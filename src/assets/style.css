@@ -2,6 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
+/* === 和風テーマのベーストークン === */
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    /* 背景・面・枠線 */
+    --ink: #080910;        /* 画面全体の濃い紺        */
+    --panel: #12141a;      /* カードの面（やや明るい紺） */
+    --panel-2: #0e1016;    /* カードの下側（少し濃い紺） */
+    --line: #252835;       /* 枠線                       */
+    --line-soft: #1b1e28;  /* 薄い枠線                   */
+
+    /* 金色系アクセント */
+    --gold: #d9b56b;
+    --gold-soft: #c39a56;
+    --gold-strong: #f1e0a0;
+
+    /* 文字 */
+    --text-hi: #f7f3e8;
+    --text: #d8d4cc;
+    --text-dim: #a3a098;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 10% -10%, rgba(217,181,107,0.06), transparent 55%),
+                radial-gradient(circle at 90% 120%, rgba(58,88,135,0.18), transparent 60%),
+                #050610;
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  button {
+    font-family: 'Noto Serif JP', serif;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* === 和カード / ボタン / HUD / 入力の共通スタイル === */
+@layer components {
+  .card-wafu {
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(18,20,26,0.96), rgba(10,12,18,0.96));
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.02);
+  }
+
+  .btn-wafu {
+    border-radius: 999px;
+    border: 1px solid rgba(217,181,107,0.5);
+    background: linear-gradient(180deg, rgba(55,60,78,0.96), rgba(28,31,44,0.96));
+    color: var(--gold-strong);
+    font-weight: 500;
+    padding: 0.35rem 0.95rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: box-shadow 0.16s ease, transform 0.08s ease, background-color 0.16s ease;
+  }
+
+  .btn-wafu:hover {
+    background: linear-gradient(180deg, rgba(64,70,92,0.98), rgba(32,36,50,0.98));
+    box-shadow: 0 8px 22px rgba(0,0,0,0.55), 0 0 0 1px rgba(217,181,107,0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-wafu:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6) inset;
+  }
+
+  .hud-wafu {
+    border-radius: 18px;
+    border: 1px solid rgba(217,181,107,0.5);
+    background: linear-gradient(135deg, rgba(20,22,32,0.98), rgba(10,12,20,0.96));
+    box-shadow: 0 22px 46px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+
+  .input-wafu {
+    @apply px-3 py-2;
+    border-radius: 10px;
+    border: 1px solid var(--line-soft);
+    background: rgba(13,16,22,0.96);
+    color: var(--text-hi);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .input-wafu:hover {
+    background: rgba(18,22,30,0.98);
+    border-color: rgba(58,65,88,0.6);
+  }
+
+  .input-wafu:focus {
+    outline: none;
+    background: rgba(20,24,34,0.98);
+    border-color: rgba(68,78,108,0.8);
+    box-shadow: 0 0 0 1px rgba(58,70,100,0.5), 0 0 0 4px rgba(50,60,85,0.18);
+  }
+
+  /* ラジオボタン・チェックボックスを金色に */
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
 }

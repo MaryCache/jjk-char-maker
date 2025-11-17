@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { reactive, computed, onMounted, watch } from "vue";
+import { reactive, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import type { CharacterSheet, LearnedItem, Rank, Sex } from "../types";
 import {
   poolFromAlloc, halfRoundUp,
   buildText1, buildText2, buildText3,
 } from "../lib/rules";
+import { FIXED_ART_NAME, LS_KEY } from "../lib/constants";
 
 import SharedHud from "./cards/SharedHud.vue";
 import SharedGenericCard from "./cards/SharedGenericCard.vue";
@@ -15,8 +16,8 @@ import Accordion from "./cards/Accordion.vue";
 
 const ranks: Rank[] = ["四","三","二","一","特"];
 const sexes: Sex[]  = ["男","女","その他"];
-const FIXED_ART_NAME = "呪力操作";
-const LS_KEY = "jjk-char-maker:v1";
+
+let uidCounter = 0;
 
 const state = reactive({
   poolAlloc: 4,
@@ -43,12 +44,35 @@ const totalComputed = computed(()=> state.sheet.human.life + state.sheet.human.s
                                   state.sheet.jujutsu.maxOutput);
 
 function ensureFixedArt(){
-  const exists = state.sheet.arts.items.some(i=>i.name===FIXED_ART_NAME);
-  if(!exists) state.sheet.arts.items.unshift({ name: FIXED_ART_NAME, research: 1 });
+  const fixedIdx = state.sheet.arts.items.findIndex(i => i.name === FIXED_ART_NAME);
+  
+  if (fixedIdx === -1) {
+    // 固定技が存在しない場合、先頭に追加
+    state.sheet.arts.items.unshift({ name: FIXED_ART_NAME, research: 1, _uid: uidCounter++ });
+  } else {
+    // 既存の固定技に _uid がなければ付与
+    const fixed = state.sheet.arts.items[fixedIdx];
+    if (fixed && !fixed._uid) {
+      fixed._uid = uidCounter++;
+    }
+    
+    // 先頭でない場合、先頭に移動
+    if (fixedIdx !== 0 && fixed) {
+      state.sheet.arts.items.splice(fixedIdx, 1);
+      state.sheet.arts.items.unshift(fixed);
+    }
+  }
 }
 
 const usedSlotsBody  = computed(()=> state.sheet.body.items.length);
-const artsUserItems  = computed(()=> state.sheet.arts.items.filter(i=> i.name!== FIXED_ART_NAME));
+const artsUserItems = computed(() => {
+  const items = state.sheet.arts.items;
+  // 固定技が先頭にあることが保証されているため、slice(1)で高速化
+  if (items.length > 0 && items[0]?.name === FIXED_ART_NAME) {
+    return items.slice(1);
+  }
+  return items.filter(i => i.name !== FIXED_ART_NAME);
+});
 const usedSlotsArts  = computed(()=> artsUserItems.value.length);
 const usedCapBody    = computed(()=> state.sheet.body.items.reduce((s,i)=> s+Math.max(0,(+i.research||0)-1),0));
 const usedCapArts    = computed(()=> artsUserItems.value.reduce((s,i)=> s+Math.max(0,(+i.research||0)-1),0));
@@ -79,19 +103,27 @@ function syncDerived(){
 
   ensureFixedArt();
 
-  // 1件制限（non-null を明示）
-  if(!state.hasInnate) state.sheet.innate = [];
-  else if(state.sheet.innate.length===0) state.sheet.innate=[{name:"",research:1}];
-  else state.sheet.innate=[state.sheet.innate[0]!];
+  // 1件制限（配列操作を最小限に）
+  if(!state.hasInnate) {
+    state.sheet.innate.length = 0;
+  } else if(state.sheet.innate.length === 0) {
+    state.sheet.innate.push({name:"",research:1,_uid:uidCounter++});
+  } else if(state.sheet.innate.length > 1) {
+    state.sheet.innate.splice(1); // 先頭以外を削除
+  }
 
-  if(!state.hasTrait) state.sheet.traits = [];
-  else if(state.sheet.traits.length===0) state.sheet.traits=[{name:"",research:1}];
-  else state.sheet.traits=[state.sheet.traits[0]!];
+  if(!state.hasTrait) {
+    state.sheet.traits.length = 0;
+  } else if(state.sheet.traits.length === 0) {
+    state.sheet.traits.push({name:"",research:1,_uid:uidCounter++});
+  } else if(state.sheet.traits.length > 1) {
+    state.sheet.traits.splice(1); // 先頭以外を削除
+  }
 }
 syncDerived();
 
 /* CRUD（安全ガード付き） */
-function addBodyItem(){ state.sheet.body.items.push({ name:"", research:1 }); }
+function addBodyItem(){ state.sheet.body.items.push({ name:"", research:1, _uid: uidCounter++ }); }
 function removeBodyItem(i:number){ state.sheet.body.items.splice(i,1); }
 function updateBodyName(i:number,v:string){
   const it = state.sheet.body.items[i]; if (it) it.name = v;
@@ -100,13 +132,24 @@ function updateBodyResearch(i:number,v:number){
   const it = state.sheet.body.items[i]; if (it) it.research = v;
 }
 
-function addArtsItem(){ state.sheet.arts.items.push({ name:"", research:1 }); }
-function removeArtsItem(iUser:number){ state.sheet.arts.items.splice(iUser+1,1); }
+function addArtsItem(){ state.sheet.arts.items.push({ name:"", research:1, _uid: uidCounter++ }); }
+function removeArtsItem(iUser:number){
+  const targetUid = artsUserItems.value[iUser]?._uid;
+  if (targetUid === undefined) return;
+  const actualIdx = state.sheet.arts.items.findIndex(it => it._uid === targetUid);
+  if (actualIdx !== -1) state.sheet.arts.items.splice(actualIdx, 1);
+}
 function updateArtsName(iUser:number,v:string){
-  const it = state.sheet.arts.items[iUser+1]; if (it) it.name = v;
+  const targetUid = artsUserItems.value[iUser]?._uid;
+  if (targetUid === undefined) return;
+  const it = state.sheet.arts.items.find(it => it._uid === targetUid);
+  if (it) it.name = v;
 }
 function updateArtsResearch(iUser:number,v:number){
-  const it = state.sheet.arts.items[iUser+1]; if (it) it.research = v;
+  const targetUid = artsUserItems.value[iUser]?._uid;
+  if (targetUid === undefined) return;
+  const it = state.sheet.arts.items.find(it => it._uid === targetUid);
+  if (it) it.research = v;
 }
 
 const text1 = computed(()=> buildText1({ ...state.sheet, total: totalComputed.value }));
@@ -130,6 +173,37 @@ function resetTotal28(){
   syncDerived(); localStorage.removeItem(LS_KEY);
 }
 
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        poolAlloc: state.poolAlloc,
+        sheet: state.sheet,
+        hasInnate: state.hasInnate,
+        hasTrait: state.hasTrait
+      }));
+    } catch {}
+  }, 500);
+}
+
+function initializeUids() {
+  state.sheet.body.items.forEach(it => {
+    if (!it._uid) it._uid = uidCounter++;
+  });
+  state.sheet.arts.items.forEach(it => {
+    if (!it._uid) it._uid = uidCounter++;
+  });
+  if (state.sheet.innate[0] && !state.sheet.innate[0]._uid) {
+    state.sheet.innate[0]._uid = uidCounter++;
+  }
+  if (state.sheet.traits[0] && !state.sheet.traits[0]._uid) {
+    state.sheet.traits[0]._uid = uidCounter++;
+  }
+}
+
 onMounted(()=> {
   try{
     const raw = localStorage.getItem(LS_KEY);
@@ -137,15 +211,57 @@ onMounted(()=> {
       const saved = JSON.parse(raw);
       Object.assign(state.sheet, saved.sheet ?? {});
       state.poolAlloc = saved.poolAlloc ?? state.poolAlloc;
-      state.hasInnate = Array.isArray(state.sheet.innate)&&state.sheet.innate.length>0;
-      state.hasTrait  = Array.isArray(state.sheet.traits)&&state.sheet.traits.length>0;
-      ensureFixedArt(); syncDerived();
+      
+      // hasInnate/hasTrait を localStorage から復元（保存されていなければ配列から推測）
+      state.hasInnate = saved.hasInnate ?? (Array.isArray(state.sheet.innate) && state.sheet.innate.length > 0);
+      state.hasTrait  = saved.hasTrait ?? (Array.isArray(state.sheet.traits) && state.sheet.traits.length > 0);
+      
+      // 順序：派生値同期 → _uid補完 → 固定技確認
+      syncDerived();    // 1. 配列を整形（splice等）
+      initializeUids(); // 2. 整形後に _uid を補完
+      ensureFixedArt(); // 3. 固定技の _uid も確実に付与
     }
   }catch{}
 });
-watch(state,(v)=>{ try{
-  localStorage.setItem(LS_KEY, JSON.stringify({ poolAlloc:v.poolAlloc, sheet:v.sheet }));
-}catch{} },{deep:true});
+
+// 知性・六感の変更を自動監視（syncDerived が必要なため個別）
+watch(
+  () => [state.sheet.human.int, state.sheet.human.sense],
+  () => syncDerived()
+);
+
+// poolAlloc の変更も自動（syncDerived が必要なため個別）
+watch(
+  () => state.poolAlloc,
+  () => {
+    state.sheet.jujutsu.pool = poolFromAlloc(state.poolAlloc);
+    syncDerived();
+  }
+);
+
+// hasInnate/hasTrait の変更を監視（syncDerived が必要なため個別）
+watch(
+  () => [state.hasInnate, state.hasTrait],
+  () => {
+    syncDerived();
+    scheduleSave();
+  }
+);
+
+// 状態の変更を一括監視（保存のみ）
+watch(
+  () => state,
+  scheduleSave,
+  { deep: true }
+);
+
+// コンポーネント破棄時のクリーンアップ
+onBeforeUnmount(() => {
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+});
 </script>
 
 <template>
@@ -182,11 +298,11 @@ watch(state,(v)=>{ try{
 
       <Accordion title="꧁——人間強度——꧂" :defaultOpen="true">
         <div class="grid grid-cols-5 gap-3">
-          <label class="field"><span>生命</span><input type="number" min="1" v-model.number="state.sheet.human.life" class="input" @change="syncDerived" /></label>
-          <label class="field"><span>膂力</span><input type="number" min="1" v-model.number="state.sheet.human.str" class="input" @change="syncDerived" /></label>
-          <label class="field"><span>敏捷</span><input type="number" min="1" v-model.number="state.sheet.human.agi" class="input" @change="syncDerived" /></label>
-          <label class="field"><span>知性</span><input type="number" min="1" v-model.number="state.sheet.human.int" class="input" @change="syncDerived" /></label>
-          <label class="field"><span>六感</span><input type="number" min="1" v-model.number="state.sheet.human.sense" class="input" @change="syncDerived" /></label>
+          <label class="field"><span>生命</span><input type="number" min="1" v-model.number="state.sheet.human.life" class="input" /></label>
+          <label class="field"><span>膜力</span><input type="number" min="1" v-model.number="state.sheet.human.str" class="input" /></label>
+          <label class="field"><span>敏捷</span><input type="number" min="1" v-model.number="state.sheet.human.agi" class="input" /></label>
+          <label class="field"><span>知性</span><input type="number" min="1" v-model.number="state.sheet.human.int" class="input" /></label>
+          <label class="field"><span>六感</span><input type="number" min="1" v-model.number="state.sheet.human.sense" class="input" /></label>
         </div>
       </Accordion>
 
@@ -194,7 +310,7 @@ watch(state,(v)=>{ try{
         <div class="grid grid-cols-3 gap-3">
           <label class="field">
             <span>呪力量</span>
-            <input type="number" min="1" v-model.number="state.poolAlloc" class="input" @change="syncDerived" />
+            <input type="number" min="1" v-model.number="state.poolAlloc" class="input" />
             <p class="hint">呪力量実値：{{ poolPreview }}</p>
           </label>
           <label class="field"><span>呪力効率（%）</span><input type="number" min="50" max="100" v-model.number="state.sheet.jujutsu.efficiency" class="input" /></label>
@@ -209,7 +325,7 @@ watch(state,(v)=>{ try{
             <SingleItemCard
               :enabled="state.hasInnate"
               :item="state.sheet.innate[0] ?? null"
-              @update:enabled="(v:boolean)=>{ state.hasInnate=v; syncDerived(); }"
+              @update:enabled="(v:boolean)=>{ state.hasInnate=v; }"
               @update:name   ="(v:string)=>{ if(!state.sheet.innate.length) state.sheet.innate=[{name:v,research:1}]; else state.sheet.innate[0]!.name=v; }"
               @update:research="(v:number)=>{ if(!state.sheet.innate.length) state.sheet.innate=[{name:'',research:v}]; else state.sheet.innate[0]!.research=v; }"
             />
@@ -223,7 +339,7 @@ watch(state,(v)=>{ try{
             <SingleItemCard
               :enabled="state.hasTrait"
               :item="state.sheet.traits[0] ?? null"
-              @update:enabled="(v:boolean)=>{ state.hasTrait=v; syncDerived(); }"
+              @update:enabled="(v:boolean)=>{ state.hasTrait=v; }"
               @update:name   ="(v:string)=>{ if(!state.sheet.traits.length) state.sheet.traits=[{name:v,research:1}]; else state.sheet.traits[0]!.name=v; }"
               @update:research="(v:number)=>{ if(!state.sheet.traits.length) state.sheet.traits=[{name:'',research:v}]; else state.sheet.traits[0]!.research=v; }"
             />
@@ -281,7 +397,7 @@ watch(state,(v)=>{ try{
           </div>
 
           <TransitionGroup name="skill" tag="div" class="space-y-2 mt-2">
-            <div v-for="(it, i) in artsUserItems" :key="'arts-'+i+':'+it.name" class="flex gap-2">
+            <div v-for="(it, i) in artsUserItems" :key="it._uid ?? (999000 + i)" class="flex gap-2">
               <input class="input flex-1" placeholder="名前" :value="it.name"
                      @input="updateArtsName(i, ($event.target as HTMLInputElement).value)" />
               <input class="input w-24" type="number" min="1" :value="it.research"
@@ -311,15 +427,15 @@ watch(state,(v)=>{ try{
 </template>
 
 <style scoped>
-.card { @apply bg-zinc-900 rounded-2xl p-4 shadow; }
 .flat-card { @apply bg-transparent p-0 shadow-none; }
 
 .field { @apply flex flex-col gap-1; }
-.input { @apply px-3 py-2 rounded border bg-zinc-800 border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-500 transition; }
-.input-fixed { @apply bg-zinc-950 border-zinc-800 text-zinc-500 italic cursor-not-allowed; }
+.input { @apply input-wafu; }
+.input-fixed { @apply input-wafu opacity-60 italic cursor-not-allowed pointer-events-none; }
 
-.btn { @apply px-3 py-1 rounded bg-zinc-700 hover:bg-zinc-600 text-sm; }
-.badge { @apply inline-flex items-center px-2 py-1 rounded bg-zinc-800 border border-zinc-700; }
+.btn { @apply btn-wafu text-sm; }
+.badge { @apply inline-flex items-center px-2 py-1 rounded border;
+  background: var(--panel); border-color: var(--line); }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .hint { @apply text-xs opacity-70; }
 

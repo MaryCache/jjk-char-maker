@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, watch, ref, onMounted, onBeforeUnmount } from "vue";
+import { SCROLL_HIDE_THRESHOLD, TOAST_DURATION } from "../../lib/constants";
 
 const props = defineProps<{
   total: number;
@@ -37,7 +38,6 @@ const slotsKey = ref(0), capKey = ref(0);
 const slotsDir = ref<'down'|'up'>('down');
 const capDir   = ref<'down'|'up'>('down');
 let prevSlots = remainSlots.value, prevCap = remainCap.value;
-
 watch(remainSlots, v => { slotsDir.value = v < prevSlots ? 'down' : 'up'; prevSlots = v; slotsKey.value++; });
 watch(remainCap,   v => { capDir.value   = v < prevCap   ? 'down' : 'up'; prevCap   = v; capKey.value++; });
 
@@ -48,28 +48,25 @@ function onScroll(){
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(()=>{
     const y = window.scrollY || 0;
-    hiddenMobile.value = y > lastY + 6; // 少しだけ下に動いたら隠す
+    hiddenMobile.value = y > lastY + SCROLL_HIDE_THRESHOLD;
     lastY = y;
   });
 }
 onMounted(()=> window.addEventListener('scroll', onScroll, { passive:true }));
 onBeforeUnmount(()=> window.removeEventListener('scroll', onScroll));
-
 /* モバイル：警告トーストのフェード */
 const showWarnToast = ref(false);
 watch(()=>props.warn, (w)=>{
   if(!w) return;
   showWarnToast.value = true;
-  setTimeout(()=> showWarnToast.value = false, 1400);
+  setTimeout(()=> showWarnToast.value = false, TOAST_DURATION);
 });
 </script>
 
 <template>
-  <!-- デスクトップ/タブレット：従来カード -->
+  <!-- デスクトップ/タブレット：従来カード（768px以上で表示） -->
   <aside
-    class="hidden sm:block fixed right-4 bottom-4 w-[340px] md:w-[380px] lg:w-[400px]
-           bg-zinc-900/95 backdrop-blur rounded-2xl shadow-lg border border-zinc-700/70 p-4
-           text-[clamp(11px,0.95vw,14px)]"
+    class="hidden md:block fixed right-4 bottom-4 w-[340px] md:w-[380px] lg:w-[400px] hud-wafu backdrop-blur p-4 text-[clamp(11px,0.95vw,14px)]"
     :class="{ 'animate-shake': warn }"
     aria-live="polite"
   >
@@ -77,7 +74,6 @@ watch(()=>props.warn, (w)=>{
       <h3 class="text-sm opacity-80">総合力</h3>
       <div class="text-2xl font-bold tabular-nums">{{ total }}</div>
     </header>
-
     <!-- 枠 -->
     <section class="space-y-1.5">
       <div class="flex items-center justify-between">
@@ -86,7 +82,7 @@ watch(()=>props.warn, (w)=>{
           {{ usedSlotsTotal }} / {{ slotsTotal }}
         </span>
       </div>
-      <div class="h-2 rounded bg-zinc-800 overflow-hidden">
+      <div class="h-2 rounded overflow-hidden" style="background: rgba(12,14,22,0.9);">
         <div class="h-full transition-all duration-300" :style="{ width: (pctSlots*100)+'%' }" :class="barClass(overSlots, equalSlots)" />
       </div>
       <div class="flex justify-end">
@@ -109,7 +105,7 @@ watch(()=>props.warn, (w)=>{
           {{ usedCapTotal }} / {{ capTotal }}
         </span>
       </div>
-      <div class="h-2 rounded bg-zinc-800 overflow-hidden">
+      <div class="h-2 rounded overflow-hidden" style="background: rgba(12,14,22,0.9);">
         <div class="h-full transition-all duration-300" :style="{ width: (pctCap*100)+'%' }" :class="barClass(overCap, equalCap)" />
       </div>
       <div class="flex justify-end">
@@ -129,9 +125,9 @@ watch(()=>props.warn, (w)=>{
       呪術: <span class="tabular-nums">{{ usedSlotsArts }}</span> 技
     </div>
   </aside>
-
   <!-- モバイル：極薄ストリップ（自動隠し）。展開なし -->
-  <div class="sm:hidden fixed left-1/2 -translate-x-1/2 bottom-3 z-50 pointer-events-none">
+    <!-- モバイル：極薄ストリップ -->
+  <div class="md:hidden fixed left-1/2 -translate-x-1/2 bottom-3 z-50 pointer-events-none">
     <!-- 警告トースト -->
     <transition name="toasty">
       <div v-if="showWarnToast"
@@ -142,8 +138,7 @@ watch(()=>props.warn, (w)=>{
     </transition>
 
     <div
-      class="pointer-events-auto flex items-center gap-2
-             bg-zinc-900/95 backdrop-blur border border-zinc-700/70 rounded-full shadow
+      class="pointer-events-auto flex items-center gap-2 hud-wafu backdrop-blur border border-zinc-700/70 rounded-full shadow
              px-3 py-1 h-[28px] w-[92vw] max-w-[420px]
              transition-transform duration-200"
       :class="hiddenMobile ? 'translate-y-8 opacity-0' : 'opacity-100'"
@@ -158,10 +153,10 @@ watch(()=>props.warn, (w)=>{
 
       <!-- 2本の極薄バー（枠/力） -->
       <div class="flex-1 flex flex-col gap-0.5">
-        <div class="h-1 rounded bg-zinc-800 overflow-hidden">
+        <div class="h-1 rounded overflow-hidden" style="background: rgba(12,14,22,0.9);">
           <div class="h-full transition-all duration-300" :style="{ width:(pctSlots*100)+'%' }" :class="barClass(overSlots, equalSlots)"></div>
         </div>
-        <div class="h-1 rounded bg-zinc-800 overflow-hidden">
+        <div class="h-1 rounded overflow-hidden" style="background: rgba(12,14,22,0.9);">
           <div class="h-full transition-all duration-300" :style="{ width:(pctCap*100)+'%' }" :class="barClass(overCap, equalCap)"></div>
         </div>
       </div>
@@ -189,7 +184,8 @@ watch(()=>props.warn, (w)=>{
 .tabular-nums { font-variant-numeric: tabular-nums; }
 
 /* ピル */
-.pill { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-sm; }
+.pill { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm;
+  background: var(--panel); border: 1px solid var(--gold-soft); color: var(--gold); }
 .pill-xs { @apply text-[11px] px-1.5 py-0; }
 .pill-warn { @apply bg-red-900/40 border-red-600 text-red-300; }
 .pill-success { @apply bg-green-900/30 border-green-600 text-green-300; animation: ring-pulse 900ms ease-out; }

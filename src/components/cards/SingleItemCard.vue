@@ -24,18 +24,22 @@ const emit = defineEmits<{
       </label>
     </div>
 
-    <div v-if="props.enabled" class="flex gap-2">
-      <input class="input flex-1" placeholder="『名称』" :value="props.item?.name ?? ''"
+    <div v-if="props.enabled && props.item" class="flex gap-2">
+      <input class="input flex-1" placeholder="『名称』" :value="props.item.name"
              @input="emit('update:name', ($event.target as HTMLInputElement).value)" />
-      <input class="input w-24" type="number" min="1" :value="props.item?.research ?? 1"
+      <input class="input w-24" type="number" min="1" :value="props.item.research"
              @input="emit('update:research', Number(($event.target as HTMLInputElement).value))" />
     </div>
 
-    <div v-else class="text-zinc-400">『なし』</div>
+    <div v-else-if="props.enabled" class="text-amber-400 text-sm">
+      ⚠ データ不整合（読み込み中...）
+    </div>
+
+    <div v-else style="color: var(--text-dim);">『なし』</div>
   </section>
 </template>
 
 <style scoped>
 .flat-card { @apply p-0 bg-transparent border-none shadow-none; }
-.input { @apply px-3 py-2 rounded bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-500; }
+.input { @apply input-wafu; }
 </style>
