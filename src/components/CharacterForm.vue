@@ -299,7 +299,7 @@ onBeforeUnmount(() => {
       <Accordion title="꧁——人間強度——꧂" :defaultOpen="true">
         <div class="grid grid-cols-5 gap-3">
           <label class="field"><span>生命</span><input type="number" min="1" v-model.number="state.sheet.human.life" class="input" /></label>
-          <label class="field"><span>膜力</span><input type="number" min="1" v-model.number="state.sheet.human.str" class="input" /></label>
+          <label class="field"><span>膂力</span><input type="number" min="1" v-model.number="state.sheet.human.str" class="input" /></label>
           <label class="field"><span>敏捷</span><input type="number" min="1" v-model.number="state.sheet.human.agi" class="input" /></label>
           <label class="field"><span>知性</span><input type="number" min="1" v-model.number="state.sheet.human.int" class="input" /></label>
           <label class="field"><span>六感</span><input type="number" min="1" v-model.number="state.sheet.human.sense" class="input" /></label>
